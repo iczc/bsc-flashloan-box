@@ -1,12 +1,12 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.6.6;
 
-import "OpenZeppelin/openzeppelin-contracts@2.4.0/contracts/math/SafeMath.sol";
-import "OpenZeppelin/openzeppelin-contracts@2.4.0/contracts/token/ERC20/IERC20.sol";
-import "OpenZeppelin/openzeppelin-contracts@2.4.0/contracts/token/ERC20/SafeERC20.sol";
+import "OpenZeppelin/openzeppelin-contracts@3.0.0/contracts/math/SafeMath.sol";
+import "OpenZeppelin/openzeppelin-contracts@3.0.0/contracts/token/ERC20/IERC20.sol";
+import "OpenZeppelin/openzeppelin-contracts@3.0.0/contracts/token/ERC20/SafeERC20.sol";
 import "../interfaces/IFlashLoanReceiver.sol";
 import "../interfaces/ILendingPoolAddressesProvider.sol";
 
-contract FlashLoanReceiverBase is IFlashLoanReceiver {
+abstract contract FlashLoanReceiverBase is IFlashLoanReceiver {
     using SafeERC20 for IERC20;
     using SafeMath for uint256;
 
@@ -14,11 +14,11 @@ contract FlashLoanReceiverBase is IFlashLoanReceiver {
 
     address public constant BNB_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
-    constructor(ILendingPoolAddressesProvider _provider) public {
-        addressesProvider = _provider;
+    constructor(address _addressProvider) public {
+        addressesProvider = ILendingPoolAddressesProvider(_addressProvider);
     }
 
-    function() external payable {}
+    receive() payable external {}
 
     function transferFundsBackToPoolInternal(address _reserve, uint256 _amount)
     internal
@@ -34,7 +34,8 @@ contract FlashLoanReceiverBase is IFlashLoanReceiver {
     ) internal {
         if (_reserve == BNB_ADDRESS) {
             //solium-disable-next-line
-            _destination.call.value(_amount).gas(50000)("");
+            (bool success, ) = _destination.call{value: _amount}("");
+            require(success == true, "Couldn't transfer BNB");
             return;
         }
         IERC20(_reserve).safeTransfer(_destination, _amount);
