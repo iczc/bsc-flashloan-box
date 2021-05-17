@@ -5,8 +5,9 @@ import "OpenZeppelin/openzeppelin-contracts@3.0.0/contracts/token/ERC20/IERC20.s
 import "OpenZeppelin/openzeppelin-contracts@3.0.0/contracts/token/ERC20/SafeERC20.sol";
 import "../interfaces/IFlashLoanReceiver.sol";
 import "../interfaces/ILendingPoolAddressesProvider.sol";
+import "../utils/Withdrawable.sol";
 
-abstract contract FlashLoanReceiverBase is IFlashLoanReceiver {
+abstract contract FlashLoanReceiverBase is IFlashLoanReceiver, Withdrawable{
     using SafeERC20 for IERC20;
     using SafeMath for uint256;
 

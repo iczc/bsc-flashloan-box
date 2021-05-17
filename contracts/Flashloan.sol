@@ -35,7 +35,7 @@ contract Flashloan is FlashLoanReceiverBase {
     }
 
 
-    function flashloanBnb(uint256 _amount) public {
+    function flashloanBnb(uint256 _amount) public onlyOwner {
         bytes memory data = "";
 
         ILendingPool lendingPool = ILendingPool(
